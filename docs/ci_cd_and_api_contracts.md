@@ -27,7 +27,7 @@
 |---|---|---|---|
 | feature/* | なし | なし | PR 用ブランチ |
 | develop | Test | 自動 | feature → develop マージ後 |
-| stg | Stage | 自動 | リリース前検証 |
+| staging | Stage | 自動 | リリース前検証 |
 | main | Prod | 自動 | 本番 |
 
 ---
@@ -148,7 +148,7 @@ infra/
 ## 11. CD（自動デプロイ）
 
 - develop マージ → Test 環境へ自動デプロイ
-- stg マージ → Stage 環境へ自動デプロイ
+- staging マージ → Stage 環境へ自動デプロイ
 - main マージ → Prod 環境へ自動デプロイ
 
 ---

@@ -3,7 +3,7 @@ name: CD Stage
 on:
   push:
     branches:
-      - stg
+      - staging
 
 jobs:
   deploy-stage:

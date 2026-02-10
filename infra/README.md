@@ -57,11 +57,11 @@ terraform plan
 GitHub Actions の `terraform.yml` では以下を実施しています。
 
 - PR（`infra/**` 変更時）: `infra/envs/test` で `terraform plan`
-- `develop` / `stg` / `main` への push: 対応環境で `init` / `plan` / `apply`
+- `develop` / `staging` / `main` への push: 対応環境で `init` / `plan` / `apply`
 
 ブランチと環境の対応:
 - `develop` -> `test`
-- `stg` -> `stage`
+- `staging` -> `stage`
 - `main` -> `prod`
 
 ## 6. 変更時チェックリスト

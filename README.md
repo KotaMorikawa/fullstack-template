@@ -130,15 +130,15 @@ npm run verify:contract-drift
 ## 7. ブランチ・環境・デプロイ運用
 
 推奨ブランチ戦略:
-- `feature/*` → `develop` → `stg` → `main`
+- `feature/*` → `develop` → `staging` → `main`
 
 GitHub Actions による環境対応:
 
 | トリガー | Workflow | 対象環境 |
 |---|---|---|
-| PR / `develop` / `stg` / `main` push | `ci.yml` | 品質チェック |
+| PR / `develop` / `staging` / `main` push | `ci.yml` | 品質チェック |
 | `develop` push | `cd-test.yml` | Test |
-| `stg` push | `cd-stage.yml` | Stage |
+| `staging` push | `cd-stage.yml` | Stage |
 | `main` push | `cd-prod.yml` | Prod |
 | `infra/**` の PR / push | `terraform.yml` | plan / apply |
 
@@ -174,7 +174,7 @@ PR で `packages/contracts/openapi.yaml` が変更された場合のみ、追加
 
 `terraform.yml` では以下を実施しています。
 - PR（`infra/**` 変更時）: `infra/envs/test` で `plan`
-- push（`develop` / `stg` / `main`）: 対応環境で `init` / `plan` / `apply`
+- push（`develop` / `staging` / `main`）: 対応環境で `init` / `plan` / `apply`
 
 ## 10. コーディング規約と開発ルール
 

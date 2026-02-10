@@ -80,7 +80,7 @@ IMPORTANT: Do not write overly defensive code. Always prefer simplicity over pat
 
 ## Commit & Pull Request Guidelines
 - Current repository history is empty, so follow Conventional Commits (example: `feat(web): add campaign filter`).
-- Branch strategy: `feature/*` -> `develop` -> `stg` -> `main`.
+- Branch strategy: `feature/*` -> `develop` -> `staging` -> `main`.
 - PRs must pass CI checks: lint, format check, typecheck, test, and build.
 - If `packages/contracts/openapi.yaml` changes, include regenerated files under `packages/api-client/src/generated`.
 - Include a concise PR description with scope, linked issue, and screenshots for UI changes.

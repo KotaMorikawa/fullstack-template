@@ -7,7 +7,7 @@ on:
   push:
     branches:
       - develop
-      - stg
+      - staging
       - main
     paths:
       - "infra/**"
@@ -50,7 +50,7 @@ jobs:
         include:
           - branch: develop
             env: test
-          - branch: stg
+          - branch: staging
             env: stage
           - branch: main
             env: prod
