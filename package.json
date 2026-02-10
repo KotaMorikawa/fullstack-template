@@ -1,0 +1,35 @@
+{
+	"name": "fullstack-template",
+	"version": "0.1.0",
+	"private": true,
+	"packageManager": "npm@10.9.2",
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"engines": {
+		"node": ">=22.0.0",
+		"npm": ">=10.0.0"
+	},
+	"scripts": {
+		"build": "turbo run build",
+		"dev": "turbo run dev --parallel",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"format:check": "biome check --formatter-enabled=true --linter-enabled=false .",
+		"typecheck": "turbo run typecheck",
+		"test": "turbo run test",
+		"generate:openapi": "node scripts/generate-openapi.mjs",
+		"generate:api-client": "node scripts/generate-api-client.mjs",
+		"verify:contract-drift": "node scripts/verify-contract-drift.mjs"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.14",
+		"turbo": "2.3.3",
+		"typescript": "5.7.3"
+	},
+	"volta": {
+		"node": "22.14.0",
+		"npm": "10.9.2"
+	}
+}

@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - stg
+      - main
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (Biome)
+        run: npm run lint
+
+      - name: Format check (Biome)
+        run: npm run format:check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+  contracts:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Detect contract changes
+        id: changed
+        shell: bash
+        run: |
+          if git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" | grep -q '^packages/contracts/openapi.yaml$'; then
+            echo "openapi=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "openapi=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prepare base OpenAPI
+        if: steps.changed.outputs.openapi == 'true'
+        shell: bash
+        run: |
+          mkdir -p .tmp
+          git show "${{ github.event.pull_request.base.sha }}:packages/contracts/openapi.yaml" > .tmp/openapi-base.yaml || cp packages/contracts/openapi.yaml .tmp/openapi-base.yaml
+
+      - name: oasdiff breaking report (non-blocking)
+        if: steps.changed.outputs.openapi == 'true'
+        continue-on-error: true
+        shell: bash
+        run: |
+          docker run --rm -v "$PWD:/work" tufin/oasdiff:latest \
+            breaking /work/.tmp/openapi-base.yaml /work/packages/contracts/openapi.yaml
+
+      - name: oasdiff changelog
+        if: steps.changed.outputs.openapi == 'true'
+        shell: bash
+        run: |
+          docker run --rm -v "$PWD:/work" tufin/oasdiff:latest \
+            changelog /work/.tmp/openapi-base.yaml /work/packages/contracts/openapi.yaml
+
+      - name: Spectral lint
+        if: steps.changed.outputs.openapi == 'true'
+        run: npx --yes @stoplight/spectral-cli lint packages/contracts/openapi.yaml -r packages/contracts/spectral.yaml
+
+      - name: Regenerate API client
+        if: steps.changed.outputs.openapi == 'true'
+        run: npm run generate:api-client
+
+      - name: Verify generated diff
+        if: steps.changed.outputs.openapi == 'true'
+        run: git diff --exit-code -- packages/api-client/src/generated
