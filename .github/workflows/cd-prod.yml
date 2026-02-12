@@ -30,5 +30,10 @@ jobs:
       - name: Build api
         run: npm run build --workspace api
 
+      - name: Run DB migration (pre-deploy gate)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run db:migrate --workspace api
+
       - name: Deploy (placeholder)
         run: echo "Deploy to Prod environment (Vercel + AWS ECS)"

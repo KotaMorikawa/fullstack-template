@@ -1,13 +1,28 @@
 import { swaggerUI } from "@hono/swagger-ui";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { getPool } from "./db/pool.js";
 
-const healthResponseSchema = z
+const healthOkResponseSchema = z
 	.object({
 		status: z.literal("ok").openapi({
 			example: "ok",
 		}),
+		database: z.literal("ok").openapi({
+			example: "ok",
+		}),
 	})
-	.openapi("HealthResponse");
+	.openapi("HealthOkResponse");
+
+const healthErrorResponseSchema = z
+	.object({
+		status: z.literal("error").openapi({
+			example: "error",
+		}),
+		database: z.literal("error").openapi({
+			example: "error",
+		}),
+	})
+	.openapi("HealthErrorResponse");
 
 const healthRoute = createRoute({
 	method: "get",
@@ -16,10 +31,18 @@ const healthRoute = createRoute({
 	summary: "Health check endpoint",
 	responses: {
 		200: {
-			description: "API is healthy",
+			description: "API and database are healthy",
 			content: {
 				"application/json": {
-					schema: healthResponseSchema,
+					schema: healthOkResponseSchema,
+				},
+			},
+		},
+		503: {
+			description: "Database connection failed",
+			content: {
+				"application/json": {
+					schema: healthErrorResponseSchema,
 				},
 			},
 		},
@@ -43,13 +66,26 @@ export const app = new OpenAPIHono();
 
 app.get("/", (c) => c.text("Hello Hono OpenAPI!"));
 
-app.openapi(healthRoute, (c) => {
-	return c.json(
-		{
-			status: "ok",
-		},
-		200,
-	);
+app.openapi(healthRoute, async (c) => {
+	try {
+		await getPool().query("select 1");
+
+		return c.json(
+			{
+				status: "ok",
+				database: "ok",
+			},
+			200,
+		);
+	} catch {
+		return c.json(
+			{
+				status: "error",
+				database: "error",
+			},
+			503,
+		);
+	}
 });
 
 app.doc("/openapi.json", openApiDocumentConfig);

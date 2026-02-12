@@ -23,7 +23,7 @@ FE/BE で内部型を直接共有せず、OpenAPI から生成した型・クラ
 - Task Orchestration: Turborepo
 - Lint / Format: Biome
 - Frontend: React 19, TanStack Start, Vite, Vitest
-- Backend: Hono, `@hono/zod-openapi`
+- Backend: Hono, `@hono/zod-openapi`, Drizzle ORM, PostgreSQL
 - IaC: Terraform（AWS）
 
 ## 3. ディレクトリ構成
@@ -59,13 +59,34 @@ npm ci
 ### API を起動
 
 ```bash
+# 初回のみ API 用 env 雛形をコピー（npm run dev/start 用）
+cp apps/api/.env.example apps/api/.env.local
+
 npm run dev --workspace api
 ```
 
+- `apps/api/.env.local` をローカル時に自動読込します（`NODE_ENV=production` では無効）。
 - API URL: `http://localhost:3000`
 - OpenAPI JSON: `http://localhost:3000/openapi.json`
 - Swagger UI: `http://localhost:3000/docs`
-- Healthcheck: `http://localhost:3000/health`
+- Healthcheck: `http://localhost:3000/health`（DB疎通込み）
+
+### API + DB を Docker で起動（ローカル）
+
+```bash
+# 1) 初回のみ env 雛形をコピー
+cp apps/api/.env.compose.example apps/api/.env.compose.local
+
+# 2) DB と API を起動（migration は自動実行しない）
+docker compose -f docker-compose.local.yml --env-file apps/api/.env.compose.local up -d db api
+
+# 3) migration が必要なときだけ手動実行
+docker compose -f docker-compose.local.yml --env-file apps/api/.env.compose.local --profile migration run --rm migrate
+```
+
+補足:
+- ローカルは安全性優先で「手動 migration」運用です。
+- DBを作り直す場合は `docker compose -f docker-compose.local.yml --env-file apps/api/.env.compose.local down -v` を使用します。
 
 ### Web を起動
 
@@ -143,6 +164,7 @@ GitHub Actions による環境対応:
 | `infra/**` の PR / push | `terraform.yml` | plan / apply |
 
 CD ワークフローでは Web build 時に `API_BASE_URL` を環境ごとに切り替えています。
+加えて、デプロイ前に `db:migrate` を実行し、成功時のみ deploy に進む構成です。
 
 ## 8. CI 品質ゲート
 

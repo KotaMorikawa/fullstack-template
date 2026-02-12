@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+**/node_modules
+dist
+**/dist
+.turbo
+.next
+coverage
+*.log
+*.tmp
+.DS_Store
+infra
+docs

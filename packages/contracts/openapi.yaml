@@ -6,7 +6,7 @@ servers:
   - url: https://api-test.example.com
 components:
   schemas:
-    HealthResponse:
+    HealthOkResponse:
       type: object
       properties:
         status:
@@ -14,8 +14,30 @@ components:
           enum:
             - ok
           example: ok
+        database:
+          type: string
+          enum:
+            - ok
+          example: ok
       required:
         - status
+        - database
+    HealthErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - error
+          example: error
+        database:
+          type: string
+          enum:
+            - error
+          example: error
+      required:
+        - status
+        - database
   parameters: {}
 paths:
   /health:
@@ -24,8 +46,14 @@ paths:
       summary: Health check endpoint
       responses:
         "200":
-          description: API is healthy
+          description: API and database are healthy
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HealthResponse"
+                $ref: "#/components/schemas/HealthOkResponse"
+        "503":
+          description: Database connection failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthErrorResponse"
